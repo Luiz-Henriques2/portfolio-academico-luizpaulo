@@ -1,3 +1,3 @@
 # portfolio-academico-luizpaulo
 
-http://luizpaulo.xyz
+https://luizpaulo.xyz
