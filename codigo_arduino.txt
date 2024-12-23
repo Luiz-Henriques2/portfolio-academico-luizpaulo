@@ -1,0 +1,187 @@
+
+#include <Servo.h>
+int pos = 0;
+Servo servo_11;
+
+const int sensorPin = A0;               // Pino do sensor TMP36
+const int gasMetanoSensorPin = A1;      // Pino do sensor de gás metano
+const int dustSensorPin = A2;           // Pino do sensor de poeira
+const int gasDioxidoSensorPin = A3;     // Pino do sensor de gás dióxido de carbono
+const int fanPin = 9;                   // Pino do ventilador (PWM)
+const int heaterPin = 10;               // Pino do aquecedor (PWM)
+const int vacPin = 4;                   // Pino da Bomba de vácuo (PWM)
+const int asperPin = 3;               // Pino do Aspersor de Agua (PWM)
+const int redPin = 5;                   // Pino do LED RGB (vermelho)
+const int greenPin = 6;                 
+const int bluePin = 7;                  
+const int whitePin = 13;                 // Pino do LED RGB (branco)
+const int silagemPin = 8;                 // Pino silagem
+
+float umidade = 0;
+float temperaturaC = 0;                 // Variável para armazenar a temperatura
+int gasLevelMetano = 0;                 // Nível de metano
+int gasLevelDioxidoCarbono = 0;         // Nível de dióxido de carbono
+int poeiraLevel = 0;                    // Nível de poeira
+
+// Variáveis de tempo para o ventilador
+unsigned long fanTimeNivel2 = 0;        // Tempo restante para ventilador nível 2
+unsigned long fanTimeNivel1 = 0;        // Tempo restante para ventilador nível 1
+
+// Variáveis de tempo para o aquecedor
+unsigned long heaterTimeNivel2 = 0;     // Tempo restante para aquecedor nível 2
+unsigned long heaterTimeNivel1 = 0;     // Tempo restante para aquecedor nível 1
+
+unsigned long TimeSilagem = 10000;        // Tempo restante para silagem
+
+void setup() {
+  Serial.begin(9600);                    // Inicializa o monitor serial
+  pinMode(fanPin, OUTPUT);               // Configura o pino do ventilador como saída
+  pinMode(heaterPin, OUTPUT);            // Configura o pino do aquecedor como saída
+  pinMode(redPin, OUTPUT);               // Configura pinos do LED RGB como saída
+  pinMode(greenPin, OUTPUT);             
+  pinMode(silagemPin, OUTPUT);
+  pinMode(bluePin, OUTPUT);              
+  pinMode(whitePin, OUTPUT);             // Pino para LED RGB branco
+  pinMode(A5, INPUT);   				 // Pino para leitura do sensor
+  //servo_11.attach(11, 500, 2500);// <<< bug
+}
+
+int cm = 0;
+long readUltrasonicDistance(int triggerPin, int echoPin)
+{
+  pinMode(triggerPin, OUTPUT);  // Clear the trigger
+  digitalWrite(triggerPin, LOW);
+  delayMicroseconds(2);
+  // Sets the trigger pin to HIGH state for 10 microseconds
+  digitalWrite(triggerPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(triggerPin, LOW);
+  pinMode(echoPin, INPUT);
+  // Reads the echo pin, and returns the sound wave travel time in microseconds
+  return pulseIn(echoPin, HIGH);
+}
+
+void loop() {
+    // measure the ping time in cm
+  cm = 0.01723 * readUltrasonicDistance(12, 12);
+  Serial.print("Distancia: ");
+  Serial.print(cm);
+  Serial.println("cm");
+  
+  // Leitura do sensor TMP36
+  int sensorValue = analogRead(sensorPin);
+  temperaturaC = ((sensorValue * 5.0 / 1024) - 0.5) * 100.0;
+
+  // Leitura dos sensores de gás e poeira
+  gasLevelMetano = analogRead(gasMetanoSensorPin);
+  gasLevelDioxidoCarbono = analogRead(gasDioxidoSensorPin);
+  poeiraLevel = analogRead(dustSensorPin);
+
+  // Leitura da umidade
+  umidade = (analogRead(A5) / 876.0) * 100; // Lê o valor de umidade
+  
+  // Exibe os valores no monitor serial
+  Serial.print("Temperatura: ");
+  Serial.print(temperaturaC);
+  Serial.print(" °C, Metano: ");
+  Serial.print(gasLevelMetano);
+  Serial.print(", Dióxido de Carbono: ");
+  Serial.print(gasLevelDioxidoCarbono);
+  Serial.print(", Poeira: ");
+  Serial.println(poeiraLevel);
+  Serial.print("Umidade: ");
+  Serial.println(umidade);
+            
+  // Controle do ventilador baseado no tempo
+  if (fanTimeNivel2 > 0) {
+    analogWrite(fanPin, 255);   // Liga ventilador em potência 2
+    fanTimeNivel2 -= 1000;      // Reduz o tempo de ventilador nível 2
+  } else if (fanTimeNivel1 > 0) {
+    analogWrite(fanPin, 128);   // Liga ventilador em potência 1
+    fanTimeNivel1 -= 1000;      // Reduz o tempo de ventilador nível 1
+  } else {
+    analogWrite(fanPin, 0);     // Desliga o ventilador
+  }
+
+  // Controle do aquecedor baseado no tempo
+  if (heaterTimeNivel2 > 0) {
+    analogWrite(heaterPin, 255);  // Liga aquecedor em potência 2
+    heaterTimeNivel2 -= 1000;     // Reduz o tempo de aquecedor nível 2
+  } else if (heaterTimeNivel1 > 0) {
+    analogWrite(heaterPin, 128);  // Liga aquecedor em potência 1
+    heaterTimeNivel1 -= 1000;     // Reduz o tempo de aquecedor nível 1
+  } else {
+    analogWrite(heaterPin, 0);    // Desliga o aquecedor
+  }
+
+  // Aqui você pode adicionar a lógica para definir os tempos de ventilador e aquecedor
+  // Exemplo: Se a temperatura for muito alta, você pode definir o tempo do ventilador nível 2
+  if (temperaturaC > 40) {
+    fanTimeNivel2 = 3000;  // Liga ventilador nível 2 por 10 segundos
+    fanTimeNivel1 = 0;
+    setLEDColor(255, 0, 0);             // LED vermelho
+  } else if (temperaturaC > 30) {
+    fanTimeNivel1 = 3000;  // Liga ventilador nível 1 por 10 segundos
+    setLEDColor(255, 255, 0);           // LED amarelo
+  }
+
+  if (temperaturaC < 0) {
+    heaterTimeNivel2 = 3000;  // Liga aquecedor nível 2 por 10 segundos
+    heaterTimeNivel1 = 0;
+    setLEDColor(255, 0, 0);             // LED vermelho
+  } else if (temperaturaC < 10) {
+    heaterTimeNivel1 = 3000;  // Liga aquecedor nível 1 por 10 segundos
+    setLEDColor(255, 255, 0);           // LED amarelo
+  }
+  
+  if (temperaturaC >= 10 && temperaturaC <= 30){
+    setLEDColor(0, 255, 0);             // LED verde
+  }
+  
+  //Controlar umidade
+  if (umidade > 25) {
+    digitalWrite(vacPin, HIGH);
+    digitalWrite(asperPin, LOW);
+  } else if (umidade < 5) {
+    digitalWrite(vacPin, LOW);
+    digitalWrite(asperPin, HIGH);
+  } else {
+    digitalWrite(vacPin, LOW);
+    digitalWrite(asperPin, LOW);
+  }
+
+    //Controlar Escolinha
+  if (cm > 300) {
+    pos = 90;
+    servo_11.write(pos);
+  } else {
+    pos = 0;
+    servo_11.write(pos);
+  }
+  
+  if (gasLevelMetano > 300 || gasLevelDioxidoCarbono >300 || poeiraLevel > 300) {
+    fanTimeNivel1 = 3000;  // Liga ventilador nível 1 por 10 segundos
+    digitalWrite(whitePin, HIGH);
+  } else {
+    digitalWrite(whitePin, LOW);
+  }
+  
+    // Controle do aquecedor baseado no tempo
+  if (TimeSilagem > 0) {
+    TimeSilagem -= 1000;     // Reduz o tempo de aquecedor nível 2
+  }else{
+    digitalWrite(silagemPin, HIGH);
+    delay(5000);
+    digitalWrite(silagemPin, LOW);
+    TimeSilagem=10000; //definir meses
+  }
+  
+  delay(1000);  // Aguarda 1 segundo antes da nova leitura
+}
+
+// Função para controlar a cor do LED RGB
+void setLEDColor(int red, int green, int blue) {
+  analogWrite(redPin, red);
+  analogWrite(greenPin, green);
+  analogWrite(bluePin, blue);
+}

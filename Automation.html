@@ -1,0 +1,359 @@
+<!DOCTYPE HTML>
+<!--
+	ZeroFour by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Silo Automation</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+
+    <!-- Prism.js Okaidia Theme CSS -->
+    <link rel="stylesheet" href="prism/prism-okaidia.min.css">
+
+    <!-- Prism.js Core and C++ Component -->
+    <script src="prism/prism.min.js"></script>
+    <script src="prism/prism-c.min.js"></script>
+    <script src="prism/prism-cpp.min.js"></script>
+	  
+
+
+    <style>
+        .hidden {
+            display: none;
+        }
+        button {
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        h2 {
+            margin-top: 20px;
+        }
+
+
+
+
+
+
+		
+    </style>
+
+	</head>
+	<body class="no-sidebar is-preload">
+		<div id="page-wrapper">
+
+			<!-- Header Wrapper -->
+				<div id="header-wrapper">
+					<div class="container">
+
+						<!-- Header -->
+							<header id="header">
+								<div class="inner">
+
+									<!-- Logo -->
+										<h1><a href="index.html" id="logo">Projects</a></h1>
+
+									<!-- Nav -->
+										<nav id="nav">
+											<ul>
+												<li><a href="index.html">Home</a></li>
+												<li class="current_page_item"><a href="Automation.html">Automação de Silos</a></li>
+												<li><a href="Simulation.html">Simulador e Petróleo</a></li>
+												<li><a href="Safety.html">Segurança Esportiva</a></li>
+											</ul>
+										</nav>
+
+								</div>
+							</header>
+
+					</div>
+				</div>
+
+			<!-- Main Wrapper -->
+				<div id="main-wrapper">
+					<div class="wrapper style1">
+						<div class="inner">
+							<div class="container">
+								<div id="content">
+
+									<!-- Content -->
+
+										<article>
+											<header class="major">
+												<h2>Automação de Silos</h2>
+												<p>Sistema de sensores e atuadores para automação de silos de milho, focado em conservação e segurança.</p>
+											</header>
+
+											<span class="image featured-silo"><img src="images/pic08.png" alt="" /></span>
+
+											<p>Projeto do Sensor de Controle e Automação do Silo Virtual
+												Neste projeto, será apresentado um sistema de controle, monitoramento e automação do
+												silo, com o objetivo de evitar custos energéticos desnecessários e minimizar a perda de grãos,
+												assim como a degradação de suas propriedades devido a problemas de climatização. Essas
+												condições adversas podem levar à proliferação de microrganismos, especialmente fungos,
+												tornando o milho inadequado para determinados destinos e até inviabilizando seu uso,
+												resultando em prejuízos para os produtores. Além disso, outras questões podem surgir devido a 
+												pragas e à germinação indesejada. Portanto, é essencial manter as condições do milho sob
+												controle.
+												<br> O sensor também deve garantir a segurança dos trabalhadores, monitorando potenciais
+												perigos, como a presença de toxinas e o risco de explosões, ao verificar os níveis de CO₂, CH₄
+												e poeira de grão, que pode ser explosiva.</p>
+												<h1>Fluxograma</h1>
+												<span class="image featured-silo"><img src="images/Fluxograma.jpg" alt="" /></span>
+
+												<h1>Projeto Tinkercad</h1>
+												<p>
+													Foi desenvolvido um modelo do sistema no simulador virtual Tinkercad. Com os componentes
+													fornecidos pelo Tinkercad, foi possível verificar o funcionamento do código e projetar 
+													o esquema de ligação, desenhando assim o esquema de montagem e do código.
+												</p>
+											
+												<button class="expand-button" onclick="loadCode('codigo_arduino.txt', 'code-container1', 'code-content1', this)">+ Mostrar Código</button>
+												<div id="code-container1" class="hidden" style="display: none;">
+													<pre><code id="code-content1" class="language-cpp"></code></pre>
+												  </div>
+												  
+
+												<span class="image featured-silo"><img src="images/ModeloTinkercad.PNG" alt="" /></span>
+
+
+												
+<!-- Feature 1 -->
+<section class="container box feature1">
+    <div class="row">
+        <!-- Descrição do quadro -->
+        <div class="col-12">
+            <header class="first major">
+                <h2>Montagem Prototipo Físico</h2>
+            </header>
+            <p>Após o código ser implementado no Tinkercad e as especificações dos componentes serem analisadas, 
+            iniciou-se a montagem do sistema. Foi necessário adaptar o código testado no Tinkercad devido às 
+            diferenças em alguns componentes e às limitações da plataforma. Além de ajustes nos pinos e adaptações 
+            de componentes, foi necessário baixar e instalar algumas bibliotecas para garantir o funcionamento 
+            correto do sistema, conforme detalhado no relatório. O processo de montagem e ajuste do código foi realizado 
+            em etapas, com cada sistema sendo testado individualmente. Abaixo os esquemas de montagem feitos para espelhar 
+			o prototipo físico.</p>  
+			<header class="first majo">
+				<h1>esquemas de montagem</h1>
+			</header>
+        </div>
+
+
+<!-- Quadro 1: Temperatura -->
+<div class="col-4 col-12-medium">
+    <section>
+        <a href="#" class="image featured"><img src="images/temperatura.png" alt="" /></a>
+        <header class="second icon solid fa-thermometer-half">
+            <h3>Temperatura</h3>
+            <p>Esquema de montagem de<br>Controle de temperatura</p>
+        </header>
+    </section>
+</div>
+
+<!-- Quadro 2: Umidade -->
+<div class="col-4 col-12-medium">
+    <section>
+        <a href="#" class="image featured"><img src="images/umidade.png" alt="" /></a>
+        <header class="second icon solid fa-tint">
+            <h3>Umidade</h3>
+            <p>Esquema de montagem sistema de<br>Controle de umidade</p>
+        </header>
+    </section>
+</div>
+
+<!-- Quadro 3: Gases Tóxicos/Inflamáveis -->
+<div class="col-4 col-12-medium">
+    <section>
+        <a href="#" class="image featured"><img src="images/gases.png" alt="" /></a>
+        <header class="second icon solid fa-fire-alt">
+            <h3>Gases Tóxicos/Inflamáveis</h3>
+            <p>Esquema de montagem sistema de<br>Controle de gases tóxicos e inflamáveis</p>
+        </header>
+    </section>
+</div>
+
+<!-- Quadro 4: Abastecimento do Silo -->
+<div class="col-4 col-12-medium">
+    <section>
+        <a href="#" class="image featured"><img src="images/abastecimento.png" alt="" /></a>
+        <header class="second icon solid fa-warehouse">
+            <h3>Abastecimento do Silo</h3>
+            <p>Esquema de montagem sistema de<br>Controle de abastecimento</p>
+        </header>
+    </section>
+</div>
+
+<!-- Quadro 5: Sistema Completo -->
+<div class="col-4 col-12-medium">
+    <section>
+        <a href="#" class="image featured"><img src="images/esquema.png" alt="" /></a>
+        <header class="second icon solid fa-cogs">
+            <h3>Sistema Completo</h3>
+            <p>Esquema de montagem sistema<br>Completo de controle</p>
+        </header>
+    </section>
+</div>
+
+
+    </div>
+</section>
+
+
+<section class="container box feature1">
+    <div class="row">
+        <!-- Descrição do quadro -->
+        <div class="col-12">
+<br>
+<br>
+			<header class="first major">
+
+			</header>
+
+			<header class="">
+				<h1>Imagem e Código do Prototipo Físico</h1>
+			</header>
+
+            <p>A seguir o codigo final utilizado no prototipo fisico em funcionamento e uma foto do sitema montado.</p>  
+        </div>
+	</div>
+</section>
+
+
+<button class="expand-button" onclick="loadCode('codigo_fisico.txt', 'code-container2', 'code-content2', this)">+ Mostrar Código</button>
+<div id="code-container2" class="hidden" style="display: none;">
+	<pre id="code-content2" class="language-cpp"></pre>
+</div>
+
+<span class="image featured-silo"><img src="images/montagem.png" alt="" /></span>
+
+        <!-- Videos -->
+<section class="container box feature1">
+    <div class="row">
+        <div class="col-12">
+<br>
+<br>
+			<header class="first major">
+
+			</header>
+
+			<header class="">
+				<h1>Vídeos do Prototipo Físico</h1>
+			</header>
+
+            <p>A seguir alguns vídeos explicativos do funcionamento do prototipo.</p>  
+        </div>
+	</div>
+</section>
+
+
+<iframe width="720" height="480" src="https://www.youtube-nocookie.com/embed/u3Mfc5u7uwA?si=1t7oRRg0DIpKOexO" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<iframe width="720" height="720" src="https://www.youtube.com/embed/1SB0bsyyhD4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<iframe width="720" height="720" src="https://www.youtube.com/embed/voDwKvDe5Og" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<iframe width="720" height="720" src="https://www.youtube.com/embed/RLgseD2xmLA?feature=share" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+
+											<p></p>
+										</article>
+
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			<!-- Footer Wrapper -->
+			<div id="footer-wrapper">
+				<footer id="footer" class="container">
+					<div class="row">
+						<div class="col-6 col-12-medium imp-medium">
+							<!-- Contact -->
+							<section>
+								<h2>Get in touch</h2>
+								<div>
+										<div class="row">
+												<div class="col-6 col-12-small">
+														<dl class="contact">
+																<dt>Linkedin</dt>
+																<dd><a href="https://www.linkedin.com/in/luiz-paulo-henriques/">luiz-paulo-henriques</a></dd>
+																<!--  <dt>Facebook</dt>
+																<dd><a href="#">facebook.com/untitled</a></dd>-->
+																<dt>WWW</dt>
+																<dd><a href="https://www.luizpaulo.xyz">luizpaulo.xyz</a></dd>
+																<dt>Email</dt>
+																<dd>luizpaulo_h@hotmail.com</dd>
+														</dl>
+												</div>
+												<div class="col-6 col-12-small">
+														<dl class="contact">
+																<dt>Address</dt>
+																<dd>
+
+																		Nova Friburgo/RJ
+
+																</dd>
+																<dt>Phone</dt>
+																<dd>(22) 99922-7311</dd>
+														</dl>
+												</div>
+										</div>
+								</div>
+						</section>
+						</div>
+					</div>
+				</footer>
+			</div>
+
+		</div>
+
+
+		<script>
+			// Objeto para armazenar quais códigos foram carregados
+			const codeLoaded = {};
+	
+			function loadCode(filePath, containerId, contentId, button) {
+			const container = document.getElementById(containerId);
+			const content = document.getElementById(contentId);
+
+			if (!codeLoaded[filePath]) {
+				fetch(filePath)
+					.then(response => {
+						if (!response.ok) throw new Error('Erro ao carregar o arquivo');
+						return response.text();
+					})
+					.then(data => {
+						content.textContent = data;
+						Prism.highlightElement(content); // Realce de sintaxe
+						codeLoaded[filePath] = true;
+					})
+					.catch(error => {
+						content.textContent = "Erro ao carregar o código: " + error.message;
+					});
+			}
+
+			// Exibe ou esconde o contêiner
+			if (container.classList.contains("hidden")) {
+				container.classList.remove("hidden");
+				container.style.display = "block";
+				button.textContent = "- Ocultar Código";
+			} else {
+				container.classList.add("hidden");
+				container.style.display = "none";
+				button.textContent = "+ Mostrar Código";
+			}
+		}
+
+		</script>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.dropotron.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>

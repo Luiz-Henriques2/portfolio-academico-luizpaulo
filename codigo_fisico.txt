@@ -1,0 +1,249 @@
+// Pinos para o MAX6675    termopar
+#include <max6675.h>
+const int thermoSCK = 4;  // Pino do SCK
+const int thermoCS = 3;   // Pino do CS
+const int thermoSO = 2;   // Pino do SO
+MAX6675 thermocouple(thermoSCK, thermoCS, thermoSO);
+
+// Variáveis para o ventilador
+#include <stdbool.h>
+const int fanPin = 6;    // Pino do ventilador (PWM)
+unsigned long fanTimeNivel2 = 0;        // Tempo restante para ventilador nível 2
+unsigned long fanTimeNivel1 = 0;        // Tempo restante para ventilador nível 1
+bool velocidade = false;
+
+//Variáveis para o servo
+#include <Servo.h>
+int pos = 0;
+Servo servo_10;
+int pos2 = 0;
+Servo servo_11;
+
+// Variáveis do Aquecedor
+const int heaterPin = 9;      // Pino do aquecedor (PWM)
+//const int MedHeaterPin = 9; //usando o mesmo pino por conta do relê
+unsigned long heaterTimeNivel2 = 0;     // Tempo restante para aquecedor nível 2
+unsigned long heaterTimeNivel1 = 0;     // Tempo restante para aquecedor nível 1
+
+//Variáveis do Sensor de Gás
+const int EtanolPin = A1;      // Pino do sensor de gás metano
+const int yellowPin = A0;       // Pino do LED yellow
+int gasLevelEtanol = 0;        // Nível de metano
+
+//Variaveis para o sensor de Umidade
+#include <DHT.h>
+#define DHTPIN A2       // Pino onde o sensor está conectado
+#define DHTTYPE DHT11  // Tipo do sensor DHT11
+DHT dht(DHTPIN, DHTTYPE);
+//const int vacPin = A5;//4          // Pino da Bomba de vácuo (PWM)
+//const int asperPin = A4;//3        // Pino do Aspersor de Água (PWM)
+//float umidade = 0;
+//const int UmidPin = A2;      // Pino do sensor de Umidade
+// Variáveis LED RGB
+const int redPin2 = A3;    // Pino do LED RGB (vermelho)
+const int greenPin2 = A4; //               
+const int bluePin2 = A5; //
+
+
+// Variáveis LED RGB
+const int redPin = 5;    // Pino do LED RGB (vermelho)
+const int greenPin = 7; //               
+const int bluePin = 8; //
+
+//Variáveis para Sensor Ultrason
+#include <NewPing.h>
+#define TRIG_PIN 12 // Pinos do HC-SR04
+#define ECHO_PIN 13
+#define MAX_DISTANCE 100 // Distância máxima em centímetros
+NewPing sonar(TRIG_PIN, ECHO_PIN, MAX_DISTANCE);// Inicializando o sensor
+
+// Variável de silagem
+int TimeSilagem = 0;
+
+void setup() {
+  Serial.begin(9600);  // Inicializa o monitor serial
+  pinMode(fanPin, OUTPUT);  // Configura o pino do ventilador como saída
+  pinMode(redPin, OUTPUT);               // Configura pinos do LED RGB como saída
+  pinMode(greenPin, OUTPUT);             
+  pinMode(bluePin, OUTPUT);     
+  pinMode(redPin2, OUTPUT);               // Configura pinos do LED RGB como saída
+  pinMode(greenPin2, OUTPUT);             
+  pinMode(bluePin2, OUTPUT);    
+
+  pinMode(heaterPin, OUTPUT);            // Configura o pino do aquecedor como saída
+  //pinMode(MedHeaterPin, OUTPUT);
+  pinMode(yellowPin, OUTPUT);             // Pino para LED RGB branco
+  servo_10.attach(10, 500, 2500);        // Servo motor para controle
+  servo_11.attach(11, 500, 2500);        // Servo motor para controle
+  //pinMode(UmidPin, INPUT);   				 // Pino para leitura do sensor de umidade
+  //pinMode(asperPin, OUTPUT);
+  //pinMode(vacPin, OUTPUT);
+  dht.begin();
+
+  delay(500);  // Aguarda o sensor ser inicializado
+}
+
+void loop() {
+    // Leitura dos sensores de Temperatura
+  float temperaturaC = thermocouple.readCelsius();  // Lê a temperatura em Celsius
+  Serial.print("Temperatura: ");
+  Serial.print(temperaturaC);
+  Serial.println(" °C");
+
+  // Leitura dos sensores de gás
+  gasLevelEtanol = analogRead(EtanolPin);
+  Serial.print("Etanol: ");
+  Serial.println(gasLevelEtanol);
+
+  // Leitura da umidade
+  float umidade = dht.readHumidity();
+  Serial.print("Umidade: ");
+  Serial.println(umidade);
+
+
+  // Leitura de Distancia
+  int distancia = sonar.ping_cm();
+  Serial.print("Distância: ");
+  if (distancia > 0) {
+    Serial.print(distancia);
+    Serial.println(" cm");
+  } else {
+    Serial.println("Sem resposta");
+  }
+  Serial.print("\n");
+
+  // Controle do ventilador baseado no tempo
+  if (fanTimeNivel2 > 0) {
+    analogWrite(fanPin, 255);  // Liga o ventilador em velocidade máxima (100% PWM)
+    fanTimeNivel2 -= 1000;    // Reduz o tempo de ventilador nível 2
+    pos2 = 90;                  // Abre Saida de Ar
+    servo_11.write(pos2);
+    velocidade = true;
+  } else if (fanTimeNivel1 > 0) {
+    if (velocidade == false) {
+    analogWrite(fanPin, 255);  // vencer atrito inicial
+    delay(1000);  // Aguarda 1 segundo
+    pos2 = 90;                  // Abre Saida de Ar
+    servo_11.write(pos2);
+    velocidade = true;
+    }
+    analogWrite(fanPin, 127);  // Liga o ventilador em velocidade média (~50% PWM)
+    fanTimeNivel1 -= 1000;    // Reduz o tempo de ventilador nível 1
+
+  } else {
+    analogWrite(fanPin, 0);    // Desliga o ventilador (0% PWM)
+    pos2 = 0;                  // Fecha Saida de Ar
+    servo_11.write(pos2);
+    velocidade = false;
+  }
+
+    // Controle do aquecedor baseado no tempo
+  if (heaterTimeNivel2 > 0) {
+    digitalWrite(heaterPin, HIGH);
+    //digitalWrite(MedHeaterPin, LOW);
+    heaterTimeNivel2 -= 1000;     // Reduz o tempo de aquecedor nível 2
+  } else if (heaterTimeNivel1 > 0) {
+    digitalWrite(heaterPin, HIGH);
+    //digitalWrite(MedHeaterPin, HIGH);
+    heaterTimeNivel1 -= 1000;     // Reduz o tempo de aquecedor nível 1
+  } else {
+    digitalWrite(heaterPin, LOW);
+    //digitalWrite(MedHeaterPin, LOW);
+  }
+
+  // Controle da temperatura
+  if (temperaturaC > 32) {
+    fanTimeNivel2 = 2000;  // Liga ventilador nível 2 por 2 segundos
+    fanTimeNivel1 = 0;
+    setLEDColor(0, 255, 255);             // LED vermelho
+    //Serial.println("maior Q 30");
+  } else if (temperaturaC > 29) {
+    fanTimeNivel1 = 2000;  // Liga ventilador nível 1 por 2 segundos
+    setLEDColor(0, 0, 255);           // LED amarelo
+    //Serial.println("maior Q 27");
+  }
+
+  if (temperaturaC < 22) {
+    heaterTimeNivel2 = 2000;  // Liga aquecedor nível 2 por 10 segundos
+    heaterTimeNivel1 = 0;
+    setLEDColor(255, 255, 0);             // LED azul
+  } else if (temperaturaC < 28) {
+    heaterTimeNivel1 = 3000;  // Liga aquecedor nível 1 por 10 segundos
+    setLEDColor(0, 255, 0);           // LED roxo
+  }
+  
+  if (temperaturaC >= 28 && temperaturaC <= 29){
+    setLEDColor(255, 0, 255);             // LED verde
+  }
+
+    // Controle de gás Etanol
+    if (gasLevelEtanol > 1000) {
+    fanTimeNivel1 = 2000; // Liga ventilador nível 1 por 10 segundos
+    digitalWrite(yellowPin, HIGH);
+  } else {
+    digitalWrite(yellowPin, LOW);
+  }
+
+    //Controlar umidade
+  if (umidade > 90) {
+    //digitalWrite(vacPin, HIGH);
+    //digitalWrite(asperPin, LOW);
+    setLEDColor2(255, 255, 0);             // LED azul
+  } else if (umidade < 80) {
+    //digitalWrite(vacPin, LOW);
+    //digitalWrite(asperPin, HIGH);
+    setLEDColor2(0, 255, 255);             // LED vermelho
+  } else {
+    //digitalWrite(vacPin, LOW);
+    //digitalWrite(asperPin, LOW);
+    setLEDColor2(255, 0, 255);             // LED verde
+  }
+
+    //Controlar Abastecimento do silo
+  if (distancia > 0 && distancia < 20) {
+    pos = 0;          // encerra abastecimento
+    servo_10.write(pos);
+  } else {
+    pos = 90;
+    servo_10.write(pos);
+
+  }
+
+  //Silagem
+    if (TimeSilagem > 0) {
+    TimeSilagem -= 1000;    
+  }else{
+    setLEDColor2(0, 0, 0);             // LED
+    delay(250);
+    setLEDColor2(0, 255, 255);             // LED
+    delay(250);
+    setLEDColor2(0, 0, 0);             // LED
+    delay(250);
+    setLEDColor2(0, 255, 255);             // LED
+    delay(250);
+    setLEDColor2(0, 0, 0);             // LED
+    delay(250);
+    setLEDColor2(0, 255, 255);             // LED
+    delay(250);
+    setLEDColor2(0, 0, 0);             // LED
+    delay(250);
+    setLEDColor2(0, 255, 255);             // LED
+    TimeSilagem=10000; //definir meses
+  }
+
+  delay(1000);  // Aguarda 1 segundo antes da nova leitura
+}
+
+// Função para controlar a cor do LED RGB
+void setLEDColor(int red, int green, int blue) {
+  analogWrite(redPin, red);
+  analogWrite(greenPin, green);
+  analogWrite(bluePin, blue);
+}
+
+// Função para controlar a cor do LED RGB
+void setLEDColor2(int red, int green, int blue) {
+  analogWrite(redPin2, red);
+  analogWrite(greenPin2, green);
+  analogWrite(bluePin2, blue);
+}

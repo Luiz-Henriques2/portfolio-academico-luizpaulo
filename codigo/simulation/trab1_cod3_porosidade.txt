@@ -1,0 +1,38 @@
+# Variando porosidade
+grades = [300]
+Phis = [0.1, 0.125, 0.15, 0.175, 0.2, 0.225, 0.25, 0.275, 0.3]
+dia = 25
+for nx in grades
+    dx = L(nx-1) # espaçamento de grade (m)
+    x = np.linspace(0, L, nx) # cria array com numeros igualmete espaçados
+
+    k = np.linspace(0.05, 0.05, nx)  # Permeabilidade variando linearmente
+    #print(k)
+
+
+    plt.figure(figsize=(7,4))#figura para grafico
+
+    for Phi in Phis
+        nt = int(diadt) # numero de passos de tempo
+
+        Gamma = (Phict)B0
+
+        p = np.zeros((nx, nt+1)) # Pressão inicial (kPa)
+        p[, 0]=3500 # Pressão inicial no reservatório é 35.000 kPa
+        p[0, ] = 0  # Pressão de contorno no poço (i=1) é 0 kPa
+
+        Pe = 40000  # Pe definido
+        p = definir_pressao_inicial(p, Pe)
+
+        # Executando a simulação
+        p = simular(nx, nt, dx, dt, Gamma, p, k, mu, B0, c, p[0, 0])
+
+        plt.plot(x, p[, -1], label=f'ϕ={Phi}')
+        plt.title(f'Distribuição de pressão com {dia.0f}dias, nx={nx} e k={k[0]}')
+
+    
+    plt.xlabel('Distância ao longo do domínio (m)')
+    plt.ylabel('Prassão (kPa)')
+    plt.legend()
+    plt.grid(True)
+    plt.show()

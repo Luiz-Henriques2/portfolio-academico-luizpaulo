@@ -1,0 +1,121 @@
+# importação de bibliotecas
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+
+# parâmetros do domínio
+L = 100000 # comprimento do dominio (m)
+dt = 0.05 # passo de tempo (dia)
+
+# propriedades dp fluido e do reservatorio
+k = 0.01 # permeabilidade (micrometro quadrado)      [0.01< k <0.1 (micrometro)]
+mu = 0.002 # viscosidade (Pa.s)                      [0.0007< mu <0.005 (Pa.s)]
+Phi = 0.12 #porosidade                               [0.1< Phi <0.3 (1)]
+c = 1e-6 #compressibilidade do fluido (1/kPa)        [1e-7< c <1e-5 (1/kPa)]
+cr = 1e-6 #compressibilidade da rocha (1/kPa)       [1e-7< c <1e-5 (1/kPa)]
+B0 = 1.5 # fator volume formação inicial (1)         [1.2< B0 <1.8 (bbl/STB)]
+
+Bc = 86.4 * 10**(-6)  # conversão para transmissibilidade
+ct=cr+c #compressibilidade total
+
+Gamma = (Phi*ct)/B0 # coeficiente de acumulação (constante)
+
+
+# Função para definir a pressão inicial em i=2 com a fórmula P_inicial = -P1 + 2*Pe
+def definir_pressao_inicial(p, Pe):
+    p[1] = -p[0] + 2*Pe
+    return p # retorna um array de pressoes
+
+def calcular_transmissibilidade(k, mu, B0, c, p, p0):
+    nx = len(p)
+    T = np.zeros(nx) #cria array cpm zeros tamanhp nx
+    for i in range(nx):
+        B = B0 / (1 + c * (p[i] - p0))
+        T[i] = k[i] /(B*mu)
+
+    #calcula media harmonica da transmissibilidade
+    T_harmonica = np.zeros(nx - 1)
+    for i in range(nx -1):
+        T_harmonica[i] = 2*T[i]*T[i+1]/(T[i]+T[i+1])
+    return T_harmonica
+
+#função principal de simulação
+def simular(nx, nt, dx, dt, Gamma, p, k, mu, B0, c, p0):
+#(pontos em x,pontos em t, passo de espaço dx, passo de tempo dt, transm., acumulação, pressoes)
+    for n in range(nt):
+        A = np.zeros((nx, nx))#inicializa uma matriz vazia('nx'por'nx')
+        b = np.zeros(nx)#inicializa um vetor vazio('1'por'nx')
+
+        T = calcular_transmissibilidade(k, mu, B0, c, p[:, n], p0)
+
+#loop que percorre cada ponto da grade exceto os pontos de contorno (de 1 até 'nx-2')
+        for i in range(1, nx-1): #define os valores da matriz A
+
+            A[i, i-1] = -T[i-1]
+            A[i, i] = T[i-1] + T[i] + Gamma * dx**2 / dt
+            A[i, i+1] = -T[i]
+            b[i] = Gamma * dx**2 / dt * p[i, n]
+
+        # condição de contorno
+        A[0, 0] = 2 * T[0] + T[1]
+        A[0, 1] = -T[1]
+        b[0] = p[0, n] # mantem a pressão inicial no poço
+        
+
+        #(derivada da pressão = 0) na extremidade direita
+        A[-1, -1] = 1
+        A[-1, -2] = -1
+        b[-1] = 0 # dp/dx = 0 x = L
+
+        # Resolver o sistema
+        p[:, n+1] = np.linalg.solve(A, b)
+
+    return p
+
+# Teste de tamanho de grade
+grades = [300]# grades = [10, 100, 300, 600]
+dias = [2, 5, 10, 25, 50, 100, 200, 500]
+
+for nx in grades:
+    dx = L/(nx-1) # espaçamento de grade (m)
+    x = np.linspace(0, L, nx) # cria array com numeros igualmete espaçados
+
+    k = np.linspace(0.1, 0.01, nx)  # Permeabilidade variando linearmente
+    #print(k)
+
+
+    plt.figure(figsize=(7,4))#figura para grafico
+
+    for dia in dias:
+        nt = int(dia/dt) # numero de passos de tempo
+
+        p = np.zeros((nx, nt+1)) # Pressão inicial (kPa)
+        p[:, 0]=3500 # Pressão inicial no reservatório é 35.000 kPa
+        p[0, :] = 0  # Pressão de contorno no poço (i=1) é 0 kPa
+
+        Pe = 40000  # Pe definido
+        p = definir_pressao_inicial(p, Pe)
+
+        # Executando a simulação
+        p = simular(nx, nt, dx, dt, Gamma, p, k, mu, B0, c, p[0, 0])
+
+        plt.plot(x, p[:, -1], label=f'{dia} dias')
+        plt.title(f'Distribuição de pressão com dx={dx:.0f}m e nx={nx}')
+
+    
+    plt.xlabel('Distância ao longo do domínio (m)')
+    plt.ylabel('Prassão (kPa)')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+
+
+
+
+
+
+
+
+
